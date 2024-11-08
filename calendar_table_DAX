@@ -1,0 +1,20 @@
+DateTable = 
+VAR StartDate = DATE(2020, 1, 1)  // Set start date
+VAR EndDate = DATE(2030, 12, 31)  // Set end date
+RETURN
+    ADDCOLUMNS(
+        CALENDAR(StartDate, EndDate),
+        "Year", YEAR([Date]),
+        "Month", MONTH([Date]),
+        "Day", DAY([Date]),
+        "MonthName", FORMAT([Date], "MMMM"),
+        "DayName", FORMAT([Date], "dddd"),
+        "Quarter", "Q" & FORMAT(QUARTER([Date]), "0"),
+        "WeekOfYear", WEEKNUM([Date], 2),  // Week starts on Monday
+        "IsFirstDayOfMonth", DAY([Date]) = 1,
+        "IsLastDayOfMonth", DAY([Date]) = DAY(EOMONTH([Date], 0)),
+        "WeekdayNumber", WEEKDAY([Date], 2),  // Monday = 1, Sunday = 7
+        "IsWeekend", IF(WEEKDAY([Date], 1) = 1 || WEEKDAY([Date], 1) = 7, TRUE, FALSE),  // Sunday = 1, Saturday = 7
+        "MonthYear", FORMAT([Date], "MMM yyyy"),
+        "DayOfYear", DATEDIFF(DATE(YEAR([Date]), 1, 1), [Date], DAY) + 1
+    )
