@@ -1,0 +1,28 @@
+= let
+    // Set start and end dates
+    StartDate = #date(2020, 1, 1),  // Set your desired start date
+    EndDate = #date(2030, 12, 31),  // Set your desired end date
+
+    // Generate a list of dates between the start and end dates
+    DateList = List.Dates(StartDate, Duration.Days(EndDate - StartDate) + 1, #duration(1, 0, 0, 0)),
+
+    // Convert the list to a table
+    DateTable = Table.FromList(DateList, Splitter.SplitByNothing(), {"Date"}),
+
+    // Add various columns for date-related attributes
+    AddYear = Table.AddColumn(DateTable, "Year", each Date.Year([Date]), Int64.Type),
+    AddMonth = Table.AddColumn(AddYear, "Month", each Date.Month([Date]), Int64.Type),
+    AddDay = Table.AddColumn(AddMonth, "Day", each Date.Day([Date]), Int64.Type),
+    AddMonthName = Table.AddColumn(AddDay, "MonthName", each Date.ToText([Date], "MMMM")),
+    AddDayName = Table.AddColumn(AddMonthName, "DayName", each Date.ToText([Date], "dddd")),
+    AddQuarter = Table.AddColumn(AddDayName, "Quarter", each "Q" & Text.From(Date.QuarterOfYear([Date]))),
+    AddIsWeekend = Table.AddColumn(AddQuarter, "IsWeekend", each if [DayOfWeek] = 0 or [DayOfWeek] = 6 then true else false),
+    AddWeekOfYear = Table.AddColumn(AddIsWeekend, "WeekOfYear", each Date.WeekOfYear([Date]), Int64.Type),
+    AddIsFirstDayOfMonth = Table.AddColumn(AddWeekOfYear, "IsFirstDayOfMonth", each Date.Day([Date]) = 1, type logical),
+    AddIsLastDayOfMonth = Table.AddColumn(AddIsFirstDayOfMonth, "IsLastDayOfMonth", each Date.Day([Date]) = Date.DaysInMonth([Date]), type logical),
+    AddWeekdayNumber = Table.AddColumn(AddIsLastDayOfMonth, "WeekdayNumber", each Date.DayOfWeek([Date], Day.Monday) + 1, Int64.Type),  // Monday = 1, Sunday = 7
+    AddMonthYear = Table.AddColumn(AddWeekdayNumber, "MonthYear", each Date.ToText([Date], "MMM yyyy")),
+    AddDayOfYear = Table.AddColumn(AddMonthYear, "DayOfYear", each Date.DayOfYear([Date]), Int64.Type)
+
+in
+    AddDayOfYear
