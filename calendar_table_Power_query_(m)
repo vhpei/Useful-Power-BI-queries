@@ -16,13 +16,14 @@
     AddMonthName = Table.AddColumn(AddDay, "MonthName", each Date.ToText([Date], "MMMM")),
     AddDayName = Table.AddColumn(AddMonthName, "DayName", each Date.ToText([Date], "dddd")),
     AddQuarter = Table.AddColumn(AddDayName, "Quarter", each "Q" & Text.From(Date.QuarterOfYear([Date]))),
-    AddIsWeekend = Table.AddColumn(AddQuarter, "IsWeekend", each if [DayOfWeek] = 0 or [DayOfWeek] = 6 then true else false),
-    AddWeekOfYear = Table.AddColumn(AddIsWeekend, "WeekOfYear", each Date.WeekOfYear([Date]), Int64.Type),
+    AddWeekOfYear = Table.AddColumn(AddQuarter, "WeekOfYear", each Date.WeekOfYear([Date]), Int64.Type),
     AddIsFirstDayOfMonth = Table.AddColumn(AddWeekOfYear, "IsFirstDayOfMonth", each Date.Day([Date]) = 1, type logical),
     AddIsLastDayOfMonth = Table.AddColumn(AddIsFirstDayOfMonth, "IsLastDayOfMonth", each Date.Day([Date]) = Date.DaysInMonth([Date]), type logical),
     AddWeekdayNumber = Table.AddColumn(AddIsLastDayOfMonth, "WeekdayNumber", each Date.DayOfWeek([Date], Day.Monday) + 1, Int64.Type),  // Monday = 1, Sunday = 7
-    AddMonthYear = Table.AddColumn(AddWeekdayNumber, "MonthYear", each Date.ToText([Date], "MMM yyyy")),
+    AddIsWeekend = Table.AddColumn(AddWeekdayNumber, "IsWeekend", each if Date.DayOfWeek([Date], Day.Sunday) = 0 or Date.DayOfWeek([Date], Day.Sunday) = 6 then true else false),
+    AddMonthYear = Table.AddColumn(AddIsWeekend, "MonthYear", each Date.ToText([Date], "MMM yyyy")),
     AddDayOfYear = Table.AddColumn(AddMonthYear, "DayOfYear", each Date.DayOfYear([Date]), Int64.Type)
 
 in
     AddDayOfYear
+
